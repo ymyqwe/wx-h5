@@ -21,46 +21,85 @@ logger.setLevel('INFO');
 // node基础配置
 const http = require('http');
 var request = require('request');
-var URL = require('url-parse');
+var sha1 = require('sha1');
+const { parse, URLSearchParams } = require('url');
 
 http.createServer((req, res) => {
     logger.info(req.method, req.url);
-    if (req.url === '/api/jsApi') {
-      console.log('jsAPi');
-      getAccessToken()
-        .then(access_token => logger.info('access_token', access_token),
-              (err)=>{
-                logger.error(err)
-                logger.info('request on ', wxConstants.url)
-                request(wxConstants.url, (error, response, body)=> {
-                  body = JSON.parse(body);
-                  logger.info(body);
-                  if (body.errcode) {
-                    logger.trace(body.errmsg)
-                  } else if (body.access_token) {
-                    logger.info('access_token', body.access_token);
-                    redisClient.set('access_token', body.access_token, 'EX', 7200);
-                  }
-                })
-            })
+    let urlObj = parse(req.url, true)
+    switch (urlObj.pathname) {
+      case '/api/access_token':
+        getAccessToken()
+          .then(access_token => {
+            getJsTicket(access_token)
+              .then(jsapi_ticket => {
+                res.end(generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket}))
+              }, ()=>{})
+          }, ()=>{})
+        break;
+      case 'api/js_ticket':
+        break;
+      default:
+        console.log('default');
+    }
+    if (req.url === '/api/access_token') {
+
     }
     res.end('hello world');
 }).listen(9000);
 
+function generateSignature(_params) {
+  let noncestr = 'ilovexiuxiu',
+      timestamp = parseInt(new Date().getTime() / 1000);
+  return sha1(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`)
+}
+
+function getJsTicket(access_token) {
+  return new Promise((resolve, reject) => {
+    redisClient.get('jsapi_ticket', (err, reply) => {
+      if (err || !reply) {
+        request(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${access_token}&type=jsapi`,
+          (err, response, body) => {
+            body = JSON.parse(body);
+            logger.info('jsapi_ticket body', body);
+            if (body.errcode === 0) {
+              logger.info('jsapi_ticket', body.ticket);
+              redisClient.set('jsapi_ticket', body.ticket, 'EX', 7200);
+              resolve(body.ticket);
+            } else {
+              logger.error(body.errmsg)
+              reject(body.errmsg);
+            }
+          }
+        )
+      } else {
+        resolve(reply);
+      }
+    })
+  })
+}
 
 // 从redis中获取access_token，如果没有则重新调微信接口
 function getAccessToken() {
   return new Promise((resolve, reject) => {
     redisClient.get('access_token', (err, reply) => {
-      if (err) {
+      if (err || !reply) {
         logger.error(err);
+        request(wxConstants.url, (error, response, body)=> {
+          body = JSON.parse(body);
+          logger.info('access_token body', body);
+          if (body.errcode) {
+            logger.error(body.errmsg)
+            reject();
+          } else if (body.access_token) {
+            logger.info('access_token', body.access_token);
+            redisClient.set('access_token', body.access_token, 'EX', 7200);
+            resolve(body.access_token);
+          }
+        })
         reject(err);
       } else {
-        if (!reply) {
-          reject('no access_token')
-        } else {
-          resolve(reply);
-        }
+        resolve(reply);
       }
     })
   })
