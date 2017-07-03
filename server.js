@@ -19,12 +19,13 @@ http.createServer((req, res) => {
       console.log('jsAPi');
       console.log(wxConstants.url);
       request(wxConstants.url, (error, response, body)=> {
+        body = JSON.parse(body);
         if (body.errcode) {
 
         } else {
           client.set('access_token', body.access_token, 'EX', 7200);
         }
-        console.log(body);
+        console.log(typeof(body));
         console.log(body["access_token"]);
       })
     }
