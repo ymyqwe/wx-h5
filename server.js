@@ -33,25 +33,43 @@ http.createServer((req, res) => {
           .then(access_token => {
             getJsTicket(access_token)
               .then(jsapi_ticket => {
-                res.end(generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket}))
-              }, ()=>{})
-          }, ()=>{})
+                let response = generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket})
+                console.log(response);
+                res.send(response);
+                logger.info('signature', signature);
+              }, (err)=>{console.log(err);}).catch(reason=>console.log(reason))
+          }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
         break;
-      case 'api/js_ticket':
+      case '/api/js_ticket':
+        getAccessToken()
+          .then(access_token => {
+            getJsTicket(access_token)
+              .then(jsapi_ticket => {
+                let response = generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket})
+                console.log(response);
+                res.writeHead(200, {"Content-Type": "application/json"});
+                res.end(JSON.stringify(response));
+                logger.info('signature', signature);
+              }, (err)=>{console.log(err);}).catch(reason=>console.log(reason))
+          }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
         break;
       default:
-        console.log('default');
+        res.end('unkown request');
+        console.log('unkown request');
     }
-    if (req.url === '/api/access_token') {
-
-    }
-    res.end('hello world');
 }).listen(9000);
 
 function generateSignature(_params) {
   let noncestr = 'ilovexiuxiu',
       timestamp = parseInt(new Date().getTime() / 1000);
-  return sha1(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`)
+  logger.info(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`);
+  let response = {
+    appId: wxConstants.AppID,
+    timestamp: timestamp,
+    noncestr: noncestr,
+    signature: sha1(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`),
+  }
+  return response
 }
 
 function getJsTicket(access_token) {
@@ -73,6 +91,7 @@ function getJsTicket(access_token) {
           }
         )
       } else {
+        logger.info('ticket_reply', typeof(reply), reply)
         resolve(reply);
       }
     })
@@ -90,15 +109,15 @@ function getAccessToken() {
           logger.info('access_token body', body);
           if (body.errcode) {
             logger.error(body.errmsg)
-            reject();
+            reject(body.errmsg);
           } else if (body.access_token) {
             logger.info('access_token', body.access_token);
             redisClient.set('access_token', body.access_token, 'EX', 7200);
             resolve(body.access_token);
           }
         })
-        reject(err);
       } else {
+        logger.info('token_reply', typeof(reply), reply)
         resolve(reply);
       }
     })
