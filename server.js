@@ -25,6 +25,7 @@ http.createServer((req, res) => {
           client.set('access_token', body.access_token, 'EX', 7200);
         }
         console.log(body);
+        console.log(body["access_token"]);
       })
     }
     res.end('hello world');
