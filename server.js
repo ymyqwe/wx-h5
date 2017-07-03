@@ -1,36 +1,46 @@
+// 微信配置
 const wxConstants = require('./constants/weixin-constants')
-const redisConstants = require('./constants/redis-constants');
+
+// mongodb配置
 var MongoClient = require('mongodb').MongoClient;
 var Db = require('mongodb').Db;
-var assert = require('assert');
+
+// redis配置
+const redisConstants = require('./constants/redis-constants');
+var redis = require('redis'),
+    redisClient = redis.createClient(redisConstants)
+
+
+// 日志系统
+const log4jsConf = require('./conf/log4js-conf')
+var log4js = require('log4js');
+log4js.configure(log4jsConf);
+var logger = log4js.getLogger('wx');
+logger.setLevel('INFO');
+
+// node基础配置
 const http = require('http');
 var request = require('request');
 var URL = require('url-parse');
 
-
-var redis = require('redis'),
-    redisClient = redis.createClient(redisConstants)
-
 http.createServer((req, res) => {
-    console.log(req.method);
-    console.log(req.url);
-
+    logger.info(req.method, req.url);
     if (req.url === '/api/jsApi') {
       console.log('jsAPi');
       getAccessToken()
-        .then(access_token => console.log('access_token', access_token),
+        .then(access_token => logger.info('access_token', access_token),
               (err)=>{
-                console.log(err);
-                console.log(wxConstants.url);
+                logger.error(err)
+                logger.info('request on ', wxConstants.url)
                 request(wxConstants.url, (error, response, body)=> {
                   body = JSON.parse(body);
+                  logger.info(body);
                   if (body.errcode) {
-
-                  } else {
+                    logger.trace(body.errmsg)
+                  } else if (body.access_token) {
+                    logger.info('access_token', body.access_token);
                     redisClient.set('access_token', body.access_token, 'EX', 7200);
                   }
-                  console.log(typeof(body));
-                  console.log(body["access_token"]);
                 })
             })
     }
@@ -38,13 +48,14 @@ http.createServer((req, res) => {
 }).listen(9000);
 
 
+// 从redis中获取access_token，如果没有则重新调微信接口
 function getAccessToken() {
   return new Promise((resolve, reject) => {
     redisClient.get('access_token', (err, reply) => {
       if (err) {
+        logger.error(err);
         reject(err);
       } else {
-        console.log(reply);
         if (!reply) {
           reject('no access_token')
         } else {
@@ -54,6 +65,7 @@ function getAccessToken() {
     })
   })
 }
+
 console.log('Server running at port:9000');
 // var url = 'mongodb://yumingyuan.me:27017/weixin';
 
