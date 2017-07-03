@@ -9,7 +9,7 @@ var URL = require('url-parse');
 
 
 var redis = require('redis'),
-    client = redis.createClient(redisConstants)
+    redisClient = redis.createClient(redisConstants)
 
 http.createServer((req, res) => {
     console.log(req.method);
@@ -17,21 +17,43 @@ http.createServer((req, res) => {
 
     if (req.url === '/api/jsApi') {
       console.log('jsAPi');
-      console.log(wxConstants.url);
-      request(wxConstants.url, (error, response, body)=> {
-        body = JSON.parse(body);
-        if (body.errcode) {
+      getAccessToken()
+        .then(access_token => console.log('access_token', access_token),
+              (err)=>{
+                console.log(err);
+                console.log(wxConstants.url);
+                request(wxConstants.url, (error, response, body)=> {
+                  body = JSON.parse(body);
+                  if (body.errcode) {
 
-        } else {
-          client.set('access_token', body.access_token, 'EX', 7200);
-        }
-        console.log(typeof(body));
-        console.log(body["access_token"]);
-      })
+                  } else {
+                    redisClient.set('access_token', body.access_token, 'EX', 7200);
+                  }
+                  console.log(typeof(body));
+                  console.log(body["access_token"]);
+                })
+            })
     }
     res.end('hello world');
 }).listen(9000);
 
+
+function getAccessToken() {
+  return new Promise((resolve, reject) => {
+    redisClient.get('access_token', (err, reply) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log(reply);
+        if (!reply) {
+          reject('no access_token')
+        } else {
+          resolve(reply);
+        }
+      }
+    })
+  })
+}
 console.log('Server running at port:9000');
 // var url = 'mongodb://yumingyuan.me:27017/weixin';
 
