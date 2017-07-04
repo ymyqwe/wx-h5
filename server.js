@@ -1,3 +1,7 @@
+// express
+var express = require('express')
+var app = express()
+
 // 微信配置
 const wxConstants = require('./constants/weixin-constants')
 
@@ -24,40 +28,31 @@ var request = require('request');
 var sha1 = require('sha1');
 const { parse, URLSearchParams } = require('url');
 
-http.createServer((req, res) => {
-    logger.info(req.method, req.url);
-    let urlObj = parse(req.url, true)
-    switch (urlObj.pathname) {
-      case '/api/access_token':
-        getAccessToken()
-          .then(access_token => {
-            getJsTicket(access_token)
-              .then(jsapi_ticket => {
-                let response = generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket})
-                console.log(response);
-                res.send(response);
-                logger.info('signature', signature);
-              }, (err)=>{console.log(err);}).catch(reason=>console.log(reason))
-          }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
-        break;
-      case '/api/js_ticket':
-        getAccessToken()
-          .then(access_token => {
-            getJsTicket(access_token)
-              .then(jsapi_ticket => {
-                let response = generateSignature({url: urlObj.query.url, jsapi_ticket: jsapi_ticket})
-                console.log(response);
-                res.writeHead(200, {"Content-Type": "application/json"});
-                res.end(JSON.stringify(response));
-                logger.info('signature', signature);
-              }, (err)=>{console.log(err);}).catch(reason=>console.log(reason))
-          }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
-        break;
-      default:
-        res.end('unkown request');
-        console.log('unkown request');
-    }
-}).listen(9000);
+app.route('/api/js_ticket')
+  .get((req, res) => {
+    logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    getAccessToken()
+      .then(access_token => {
+        getJsTicket(access_token)
+          .then(jsapi_ticket => {
+            let response = generateSignature({url: req.query.url, jsapi_ticket: jsapi_ticket})
+            res.json(response);
+            logger.info('signature', response);
+          }, (err)=>{console.log(err);}).catch(reason=>console.log(reason))
+      }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
+  })
+
+app.route(/.*/g)
+  .get((req, res) => {
+    logger.info(req.url, req.method, req.ip);
+    res.end('unknown request')
+  })
+
+
+app.listen(9000, function () {
+  console.log('app listening on port 9000!')
+})
+
 
 function generateSignature(_params) {
   let noncestr = 'ilovexiuxiu',
@@ -125,7 +120,6 @@ function getAccessToken() {
   })
 }
 
-console.log('Server running at port:9000');
 // var url = 'mongodb://yumingyuan.me:27017/weixin';
 
 // var insertDocuments = function(db, callback) {
