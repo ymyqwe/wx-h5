@@ -61,13 +61,14 @@ http.createServer((req, res) => {
 
 function generateSignature(_params) {
   let noncestr = 'ilovexiuxiu',
-      timestamp = parseInt(new Date().getTime() / 1000);
-  logger.info(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`);
+      timestamp = parseInt(new Date().getTime() / 1000),
+      url = decodeURIComponent(_params.url);
+  logger.info(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${url}`);
   let response = {
     appId: wxConstants.AppID,
     timestamp: timestamp,
     noncestr: noncestr,
-    signature: sha1(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${_params.url}`),
+    signature: sha1(`jsapi_ticket=${_params.jsapi_ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${url}`),
   }
   return response
 }
