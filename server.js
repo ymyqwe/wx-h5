@@ -42,10 +42,10 @@ app.route('/api/js_ticket')
       }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
   })
 
-app.route('/api/userInfo')
+app.route('/api/userInfo/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
-    getUserInfo().then(
+    getUserInfo(req.query.code).then(
       (user) => res.json(user),
       () => {}
     )
