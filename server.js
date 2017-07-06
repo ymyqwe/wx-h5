@@ -59,10 +59,10 @@ app.route('/api/wxLogin/')
       let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
       res.redirect(wechatUri);
     } else {
-      logger.info('code', req.query.code)
-      getUserInfo(req.query.code).then(
-
-      )
+      // logger.info('code', req.query.code)
+      // getUserInfo(req.query.code).then(
+      //   () =>
+      // )
     }
   })
 
@@ -81,10 +81,11 @@ function getUserInfo(code) {
   return new Promise((resolve, reject) => {
     request(`https://api.weixin.qq.com/sns/oauth2/access_token?appid=${wxConstants.AppID}&secret=${wxConstants.AppSecret}&code=${code}&grant_type=authorization_code`,
       (err, response, body) => {
+        body = JSON.parse(body);
         logger.info('user_info', typeof(body), body)
+        resolve(body)
       }
     )
-    resolve({user: 'abc'});
   })
 }
 
