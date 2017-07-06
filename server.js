@@ -54,9 +54,15 @@ app.route('/api/userInfo')
 app.route('/api/wxLogin/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
-    let redirect_uri = req.query.next;
-    let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
-    res.redirect(wechatUri);
+    if (!req.query.code) {
+      let redirect_uri = req.query.next;
+      let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+      res.redirect(wechatUri);
+    } else {
+      getUserInfo(req.query.code).then(
+
+      )
+    }
   })
 
 app.route(/.*/g)
@@ -70,8 +76,13 @@ app.listen(9000, function () {
   console.log('app listening on port 9000!')
 })
 
-function getUserInfo() {
+function getUserInfo(code) {
   return new Promise((resolve, reject) => {
+    request(`https://api.weixin.qq.com/sns/oauth2/access_token?appid=${wxConstants.AppID}&secret=${wxConstants.AppSecret}&code=${code}&grant_type=authorization_code`,
+      (err, response, body) => {
+        logger.info('user_info', typeof(body), body)
+      }
+    )
     resolve({user: 'abc'});
   })
 }
