@@ -83,7 +83,13 @@ function getUserInfo(code) {
       (err, response, body) => {
         body = JSON.parse(body);
         logger.info('user_info', typeof(body), body)
-        resolve(body)
+        if (!body.errmsg) {
+          request(`https://api.weixin.qq.com/sns/userinfo?access_token=${body.access_token}&openid=${body.openid}&lang=zh_CN`,
+            (err, response, body) => {
+              resolve(body)
+            }
+          )
+        }
       }
     )
   })
