@@ -59,6 +59,7 @@ app.route('/api/wxLogin/')
       let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
       res.redirect(wechatUri);
     } else {
+      logger.info('code', req.query.code)
       getUserInfo(req.query.code).then(
 
       )
