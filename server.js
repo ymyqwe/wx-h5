@@ -42,6 +42,23 @@ app.route('/api/js_ticket')
       }, (err)=>{ console.log(err);}).catch(reason=>console.log(reason))
   })
 
+app.route('/api/userInfo')
+  .get((req, res) => {
+    logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    getUserInfo().then(
+      (user) => res.json(user),
+      () => {}
+    )
+  })
+
+app.route('/api/wxLogin/')
+  .get((req, res) => {
+    logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    let redirect_uri = req.query.next;
+    let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+    res.redirect(wechatUri);
+  })
+
 app.route(/.*/g)
   .get((req, res) => {
     logger.info(req.url, req.method, req.ip);
@@ -53,6 +70,11 @@ app.listen(9000, function () {
   console.log('app listening on port 9000!')
 })
 
+function getUserInfo() {
+  return new Promise((resolve, reject) => {
+    resolve({user: 'abc'});
+  })
+}
 
 function generateSignature(_params) {
   let noncestr = 'ilovexiuxiu',
