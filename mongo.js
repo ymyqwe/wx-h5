@@ -31,6 +31,6 @@ var yutou = new user({
   nickname: 'yutou'
 })
 
-yutou.save((err, yutou) {
+yutou.save((err, yutou) => {
   if (err) return console.error(err);
 })
