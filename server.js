@@ -5,9 +5,9 @@ var app = express()
 // 微信配置
 const wxConstants = require('./constants/weixin-constants')
 
-// mongodb配置
-var MongoClient = require('mongodb').MongoClient;
-var Db = require('mongodb').Db;
+// mongoose配置
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://yumingyuan.me/wechat');
 
 // redis配置
 const redisConstants = require('./constants/redis-constants');
