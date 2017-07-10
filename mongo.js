@@ -1,5 +1,5 @@
 // mongoose配置
-var mongoose = require('./constants/mongoose');
+var mongoose = require('./constants/mongo-constants');
 const Schema = mongoose.Schema;
 
 const userSchema = mongoose.Schema({
