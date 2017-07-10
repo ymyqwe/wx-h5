@@ -28,8 +28,8 @@ userSchema.statics = {
     return this.remove({ wechat_id }).exec();
   },
 
-  save: function(model) {
-    return new user(model).save();
+  save: function(data) {
+    return user.save(data);
   }
 }
 
@@ -42,7 +42,7 @@ if (require.main === module) {
   let data = {
   "openid":"yutoutou",
   "nickname": "yutoutou",
-  "sex":"yutoutou",
+  "sex":1,
   "province":"yutoutou",
   "city":"yutoutou",
   "country":"yutoutou",
