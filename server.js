@@ -56,8 +56,8 @@ app.route('/api/userInfo/')
         mongo.findByOpenId({openid: user.openid}).then(
           (result) => {
             if (result) {
-              res.json(result)
               res.cookie('openid',result.openid, { maxAge: 900000, httpOnly: true })
+              res.json(result)
             } else {
               mongo.save(user);
               res.cookie('openid',user.openid, { maxAge: 900000, httpOnly: true })
