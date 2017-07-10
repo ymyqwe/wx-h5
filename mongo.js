@@ -19,19 +19,19 @@ const userSchema = mongoose.Schema({
 
 
 
-// userSchema.statics = {
-//   findByWechatId: function(wechat_id) {
-//     return this.findOne({wechat_id}).exec();
-//   },
+userSchema.statics = {
+  findByWechatId: function(wechat_id) {
+    return this.findOne({wechat_id}).exec();
+  },
 
-//   deleteById: function (wechat_id) {
-//     return this.remove({ wechat_id }).exec();
-//   },
+  deleteById: function (wechat_id) {
+    return this.remove({ wechat_id }).exec();
+  },
 
-//   save: function(model) {
-//     return new user(model).save();
-//   }
-// }
+  save: function(model) {
+    return new user(model).save();
+  }
+}
 
 var user = mongoose.model('user', userSchema);
 

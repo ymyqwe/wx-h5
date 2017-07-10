@@ -49,6 +49,7 @@ app.route('/api/userInfo/')
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
     getUserInfo(req.query.code).then(
       (user) => {
+        logger.info(user, typeof(user));
         mongo.save(user);
         res.json(user)
       },
@@ -91,6 +92,7 @@ function getUserInfo(code) {
         if (!body.errmsg) {
           request(`https://api.weixin.qq.com/sns/userinfo?access_token=${body.access_token}&openid=${body.openid}&lang=zh_CN`,
             (err, response, body) => {
+              body = JSON.parse(body);
               resolve(body)
             }
           )
