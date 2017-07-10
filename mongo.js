@@ -4,7 +4,7 @@ var app = express()
 
 // mongoose配置
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://yumingyuan.me/wechat');
+mongoose.connect('mongodb://127.0.0.1/wechat');
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
