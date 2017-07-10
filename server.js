@@ -6,8 +6,10 @@ var app = express()
 const wxConstants = require('./constants/weixin-constants')
 
 // mongoose配置
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://yumingyuan.me/wechat');
+// var mongoose = require('mongoose');
+// mongoose.connect('mongodb://yumingyuan.me/wechat');
+var mongo = require('./mongo');
+
 
 // redis配置
 const redisConstants = require('./constants/redis-constants');
@@ -46,7 +48,10 @@ app.route('/api/userInfo/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
     getUserInfo(req.query.code).then(
-      (user) => res.json(user),
+      (user) => {
+        mongo.save(user);
+        res.json(user)
+      },
       () => {}
     )
   })
@@ -160,48 +165,3 @@ function getAccessToken() {
     })
   })
 }
-
-// var url = 'mongodb://yumingyuan.me:27017/weixin';
-
-// var insertDocuments = function(db, callback) {
-//   // Get the documents collection
-//   var collection = db.collection('documents');
-//   // Insert some documents
-//   collection.insertMany([
-//     {a : 1}, {a : 2}, {a : 3}
-//   ], function(err, result) {
-//     assert.equal(err, null);
-//     assert.equal(3, result.result.n);
-//     assert.equal(3, result.ops.length);
-//     console.log("Inserted 3 documents into the collection");
-//     callback(result);
-//   });
-// }
-
-// var updateDocument = function(db, callback) {
-//   // Get the documents collection
-//   var collection = db.collection('documents');
-//   // Update document where a is 2, set b equal to 1
-//   collection.updateOne({ a : 2 }
-//     , { $set: { b : 1 } }
-//     ,{ upsert: true}
-//     ,function(err, result) {
-//     assert.equal(err, null);
-//     assert.equal(1, result.result.n);
-//     console.log("Updated the document with the field a equal to 2");
-//     callback(result);
-//   });
-// }
-
-// function cb(data) {
-//   console.log('succeeded');
-// }
-// MongoClient.connect(url, (err, db) => {
-//   assert.equal(null, err);
-//   console.log('Connect to Server');;
-
-//   // insertDocument(db, ()=>{console.log('hahaha');})
-//   // insertDocuments(db, cb)
-//   updateDocument(db,cb)
-// })
-

@@ -1,37 +1,55 @@
-// express
-var express = require('express')
-var app = express()
-
 // mongoose配置
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://yumingyuan.me/wechat');
+var mongoose = require('./constants/mongoose');
+const Schema = mongoose.Schema;
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  // we're connected!
-});
-
-var userSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
   "openid":String,
   "nickname": String,
-  // "sex":String,
-  // "province":String,
-  // "city":String,
-  // "country":String,
-  // "headimgurl":String,
-  // "privilege":String,
-  // "unionid": String
-})
+  "sex":String,
+  "province":String,
+  "city":String,
+  "country":String,
+  "headimgurl":String,
+  "privilege":String,
+  "unionid": String
+}, {
+  collection: 'wechat'
+});
 
-var user = mongoose.model('wechat_user', userSchema);
 
-var yutou = new user({
-  openid: '123',
-  nickname: 'yutou'
-})
 
-yutou.save((err, yutou) => {
 
-  if (err) return console.error(err);
-})
+userSchema.statics = {
+  findByWechatId: function(wechat_id) {
+    return this.findOne({wechat_id}).exec();
+  },
+
+  deleteById: function (wechat_id) {
+    return this.remove({ wechat_id }).exec();
+  },
+
+  save: function(model) {
+    return new user(model).save();
+  }
+}
+
+var user = mongoose.model('model', userSchema);
+
+module.exports = user;
+
+//test
+if (require.main === module) {
+  let data = {
+  "openid":"yutoutou",
+  "nickname": "yutoutou",
+  "sex":"yutoutou",
+  "province":"yutoutou",
+  "city":"yutoutou",
+  "country":"yutoutou",
+  "headimgurl":"yutoutou",
+  "privilege":"yutoutou",
+  "unionid": "yutoutou"
+};
+  user.save(data);
+}
+
