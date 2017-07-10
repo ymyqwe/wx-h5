@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const userSchema = mongoose.Schema({
   "openid":String,
   "nickname": String,
-  "sex":String,
+  "sex":Number,
   "province":String,
   "city":String,
   "country":String,
