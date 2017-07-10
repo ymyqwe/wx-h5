@@ -23,14 +23,6 @@ var log4js = require('log4js');
 log4js.configure(log4jsConf);
 var logger = log4js.getLogger('wx');
 logger.setLevel('INFO');
-try {
-  require('fs').mkdirSync('./log');
-} catch (e) {
-  if (e.code != 'EEXIST') {
-    console.error("Could not set up log directory, error was: ", e);
-    process.exit(1);
-  }
-}
 
 // node基础配置
 const http = require('http');
@@ -59,6 +51,7 @@ app.route('/api/userInfo/')
       (user) => {
         logger.info('user_info', user);
         let userInfo = mongo.findByOpenId({openid: user.openid});
+        logger.info('find user', userInfo)
         if (userInfo) {
           res.json(userInfo)
         } else {
