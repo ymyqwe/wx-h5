@@ -97,9 +97,8 @@ app.route('/api/wxLogin/')
       mongo.findByOpenId({openid: req.cookies.openid}).then(
         (result) => {
           if (result) {
-            result.logined = true;
-            console.log('result', result);
-            res.json(result)
+            console.log('result', typeof(result), result);
+            res.json(Object.assign({logined: true}, result))
           } else {
             res.json({'logined': false})
           }
