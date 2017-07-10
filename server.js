@@ -83,6 +83,7 @@ app.route('/api/userInfo/')
 app.route('/api/wxLogin/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    logger.info('cookies', req.cookies)
     if (!req.cookies.openid) {
       res.json({'logined': false})
     } else {
@@ -92,9 +93,11 @@ app.route('/api/wxLogin/')
       //     console.log('login res', response, body);
       //     res.json(body);
       //   })
+      logger.info('find mongo openid', req.cookies.openid)
       mongo.findByOpenId({openid: req.cookies.openid}).then(
         (result) => {
           if (result) {
+            console.log('result', result);
             result = Object.assign({logined: true}, result)
             res.json(result)
           } else {
