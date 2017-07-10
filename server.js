@@ -49,11 +49,16 @@ app.route('/api/userInfo/')
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
     getUserInfo(req.query.code).then(
       (user) => {
-        logger.info(user, typeof(user));
-        mongo.save(user);
-        res.json(user)
+        logger.info('user_info', user);
+        let userInfo = mongo.findByOpenId({openid: user.openid});
+        if (userInfo) {
+          res.json(userInfo)
+        } else {
+          mongo.save(user);
+          res.json(user)
+        }
       },
-      () => {}
+      (err) => {logger.info(err)}
     )
   })
 

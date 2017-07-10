@@ -13,19 +13,19 @@ const userSchema = mongoose.Schema({
   "privilege":String,
   "unionid": String
 }, {
-  collection: 'wechat'
+  collection: 'wechat_user'
 });
 
 
 
 
 userSchema.statics = {
-  findByWechatId: function(wechat_id) {
-    return this.findOne({wechat_id}).exec();
+  findByOpentId: function(openid) {
+    return this.findOne(openid).exec();
   },
 
   deleteById: function (wechat_id) {
-    return this.remove({ wechat_id }).exec();
+    return this.remove(wechat_id).exec();
   },
 
   save: function(model) {
