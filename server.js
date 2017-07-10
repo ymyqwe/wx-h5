@@ -50,7 +50,10 @@ app.route('/api/userInfo/')
     getUserInfo(req.query.code).then(
       (user) => {
         logger.info('user_info', user);
-        let userInfo = mongo.findByOpenId({openid: user.openid});
+        mongo.findByOpenId({openid: user.openid}).then(
+          (result) => console.log('result', result),
+          (err)=> console.log(err)
+        )
         logger.info('find user', userInfo)
         if (userInfo) {
           res.json(userInfo)
