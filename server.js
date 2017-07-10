@@ -1,6 +1,7 @@
 // express
 var express = require('express')
 var app = express()
+app.use(cookieParser())
 
 // 微信配置
 const wxConstants = require('./constants/weixin-constants')
@@ -47,6 +48,7 @@ app.route('/api/js_ticket')
 app.route('/api/userInfo/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    console.log(req.cookies);
     getUserInfo(req.query.code).then(
       (user) => {
         logger.info('user_info', user);
@@ -54,8 +56,10 @@ app.route('/api/userInfo/')
           (result) => {
             if (result) {
               res.json(result)
+              res.cookie('openid',result.openid, { maxAge: 900000, httpOnly: true })
             } else {
               mongo.save(user);
+              res.cookie('openid',user.openid, { maxAge: 900000, httpOnly: true })
               res.json(user)
             }
           },
@@ -69,6 +73,7 @@ app.route('/api/userInfo/')
 app.route('/api/wxLogin/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
+    console.log(req.cookies);
     if (!req.query.code) {
       let redirect_uri = req.query.next;
       let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
