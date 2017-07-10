@@ -51,16 +51,16 @@ app.route('/api/userInfo/')
       (user) => {
         logger.info('user_info', user);
         mongo.findByOpenId({openid: user.openid}).then(
-          (result) => console.log('result', result),
+          (result) => {
+            if (result) {
+              res.json(result)
+            } else {
+              mongo.save(user);
+              res.json(user)
+            }
+          },
           (err)=> console.log(err)
         )
-        // logger.info('find user', userInfo)
-        // if (userInfo) {
-        //   res.json(userInfo)
-        // } else {
-        //   mongo.save(user);
-        //   res.json(user)
-        // }
       },
       (err) => {logger.info(err)}
     )
