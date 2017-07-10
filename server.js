@@ -54,13 +54,13 @@ app.route('/api/userInfo/')
           (result) => console.log('result', result),
           (err)=> console.log(err)
         )
-        logger.info('find user', userInfo)
-        if (userInfo) {
-          res.json(userInfo)
-        } else {
-          mongo.save(user);
-          res.json(user)
-        }
+        // logger.info('find user', userInfo)
+        // if (userInfo) {
+        //   res.json(userInfo)
+        // } else {
+        //   mongo.save(user);
+        //   res.json(user)
+        // }
       },
       (err) => {logger.info(err)}
     )

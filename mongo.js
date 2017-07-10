@@ -1,6 +1,7 @@
 // mongoose配置
 var mongoose = require('./constants/mongo-constants');
 const Schema = mongoose.Schema;
+mongoose.Promise = global.Promise
 
 const userSchema = mongoose.Schema({
   "openid":String,
