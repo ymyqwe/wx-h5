@@ -98,6 +98,7 @@ app.route('/api/wxLogin/')
         (result) => {
           if (result) {
             console.log('result', typeof(result), result);
+            console.log(result['_doc']);
             res.json(Object.assign({logined: true}, result))
           } else {
             res.json({'logined': false})
