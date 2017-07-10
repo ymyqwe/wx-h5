@@ -99,7 +99,7 @@ app.route('/api/wxLogin/')
           if (result) {
             console.log('result', typeof(result), result);
             console.log(result['_doc']);
-            res.json(Object.assign({logined: true}, result))
+            res.json(Object.assign({logined: true}, result['_doc']))
           } else {
             res.json({'logined': false})
           }
