@@ -51,7 +51,7 @@ app.route('/api/userInfo/')
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
     logger.info()
     if (req.cookies.openid) {
-      mongo.findByOpenId({openid: user.openid}).then(
+      mongo.findByOpenId({openid: req.cookies.openid}).then(
         (result) => {
           res.json(result)
         },
