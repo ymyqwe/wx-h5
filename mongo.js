@@ -20,7 +20,7 @@ const userSchema = mongoose.Schema({
 
 
 userSchema.statics = {
-  findByOpentId: function(openid) {
+  findByOpenId: function(openid) {
     return this.findOne(openid).exec();
   },
 
