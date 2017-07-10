@@ -100,7 +100,7 @@ app.route('/api/wxLogin/')
             console.log('result', result);
             result = Object.assign({logined: true}, result)
             console.log('second re', result);
-            res.json(result)
+            res.json({ ...result, logined: true })
           } else {
             res.json({'logined': false})
           }
