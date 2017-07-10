@@ -83,11 +83,7 @@ app.route('/api/userInfo/')
 app.route('/api/wxLogin/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
-    console.log(req.cookies);
     if (!req.cookies.openid) {
-      let redirect_uri = req.query.next;
-      // let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
-      // res.redirect(wechatUri);
       res.json({'logined': false})
     } else {
       // logger.info('code', req.query.code)
@@ -96,7 +92,17 @@ app.route('/api/wxLogin/')
       //     console.log('login res', response, body);
       //     res.json(body);
       //   })
-      res.json({'logined': true})
+      mongo.findByOpenId({openid: req.cookies.openid}).then(
+        (result) => {
+          if (result) {
+            result = Object.assign({logined: true}, result)
+            res.json(result)
+          } else {
+            res.json({'logined': false})
+          }
+        },
+        (err)=> console.log(err)
+      )
     }
   })
 
