@@ -13,15 +13,15 @@ db.once('open', function() {
 });
 
 var userSchema = mongoose.Schema({
-  "openid":string,
-  "nickname": string,
-  // "sex":string,
-  // "province":string,
-  // "city":string,
-  // "country":string,
-  // "headimgurl":string,
-  // "privilege":string,
-  // "unionid": string
+  "openid":String,
+  "nickname": String,
+  // "sex":String,
+  // "province":String,
+  // "city":String,
+  // "country":String,
+  // "headimgurl":String,
+  // "privilege":String,
+  // "unionid": String
 })
 
 var user = mongoose.model('wechat_user', userSchema);
@@ -32,5 +32,6 @@ var yutou = new user({
 })
 
 yutou.save((err, yutou) => {
+
   if (err) return console.error(err);
 })
