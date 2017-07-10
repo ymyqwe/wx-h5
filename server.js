@@ -49,26 +49,35 @@ app.route('/api/js_ticket')
 app.route('/api/userInfo/')
   .get((req, res) => {
     logger.info(req.method, req.url, req.query, 'ip ', req.ip);
-    console.log(req.cookies);
-    getUserInfo(req.query.code).then(
-      (user) => {
-        logger.info('user_info', user);
-        mongo.findByOpenId({openid: user.openid}).then(
-          (result) => {
-            if (result) {
-              res.cookie('openid',result.openid, { maxAge: 900000, httpOnly: true })
-              res.json(result)
-            } else {
-              mongo.save(user);
-              res.cookie('openid',user.openid, { maxAge: 900000, httpOnly: true })
-              res.json(user)
-            }
-          },
-          (err)=> console.log(err)
-        )
-      },
-      (err) => {logger.info(err)}
-    )
+    logger.info()
+    if (req.cookies.openid) {
+      mongo.findByOpenId({openid: user.openid}).then(
+        (result) => {
+          res.json(result)
+        },
+        (err)=> console.log(err)
+      )
+    } else {
+      getUserInfo(req.query.code).then(
+        (user) => {
+          logger.info('user_info', user);
+          mongo.findByOpenId({openid: user.openid}).then(
+            (result) => {
+              if (result) {
+                res.cookie('openid',result.openid, { maxAge: 900000, httpOnly: true })
+                res.json(result)
+              } else {
+                mongo.save(user);
+                res.cookie('openid',user.openid, { maxAge: 900000, httpOnly: true })
+                res.json(user)
+              }
+            },
+            (err)=> console.log(err)
+          )
+        },
+        (err) => {logger.info(err)}
+      )
+    }
   })
 
 app.route('/api/wxLogin/')
@@ -80,10 +89,12 @@ app.route('/api/wxLogin/')
       let wechatUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConstants.AppID}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
       res.redirect(wechatUri);
     } else {
-      // logger.info('code', req.query.code)
-      // getUserInfo(req.query.code).then(
-      //   () =>
-      // )
+      logger.info('code', req.query.code)
+      request(`/api/userInfo/?code=${req.query.code}`,
+        (err, response, body)=> {
+          console.log('login res', response, body);
+          res.json(body);
+        })
     }
   })
 
